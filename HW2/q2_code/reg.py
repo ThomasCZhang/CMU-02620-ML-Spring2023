@@ -14,13 +14,13 @@ class LogisticRegression:
             A float.
         """
         bias = 0
-        sufficient_stat = np.zeros(X.shape[0])
+        inner_prod = np.zeros(X.shape[0])
         for idx0 in range(X.shape[0]):
             for idx1 in range(X.shape[1]):
-                sufficient_stat[idx0] += self.w[idx1]*X[idx0, idx1]
+                inner_prod[idx0] += self.w[idx1]*X[idx0, idx1]
         loss = 0
         for idx0 in range(X.shape[0]):
-            loss += np.log(1 + np.exp(sufficient_stat[idx0]))-Y[idx0]*sufficient_stat[idx0]
+            loss += np.log(1 + np.exp(inner_prod[idx0]))-Y[idx0]*inner_prod[idx0]
         loss = loss/X.shape[0]
         return loss
         
@@ -34,17 +34,15 @@ class LogisticRegression:
         bias = 0
         gradients = np.zeros(X.shape[1])
         # The sufficient statistic for conditional MLE
-        sufficient_stat = [0 for i in range(X.shape[0])]
+        inner_prod = [0 for i in range(X.shape[0])]
         for idx0 in range(X.shape[0]):
             for idx1, x_val in enumerate(X[idx0, :]):
-                sufficient_stat[idx0] += self.w[idx1]*x_val
+                inner_prod[idx0] += self.w[idx1]*x_val
 
         for idx0 in range(X.shape[1]):
             for idx1 in range(X.shape[0]):
-                # gradients[idx0] += (X[idx1,idx0]*np.exp(sufficient_stat[idx1]))/(1+np.exp(sufficient_stat[idx1])) \
-                #     - Y[idx1]*X[idx1,idx0]  
-                gradients[idx0] += X[idx1,idx0]*(
-                    (np.exp(sufficient_stat[idx1]))/(1+np.exp(sufficient_stat[idx1]))- Y[idx1]
+                  gradients[idx0] += X[idx1,idx0]*(
+                    (np.exp(inner_prod[idx1]))/(1+np.exp(inner_prod[idx1]))- Y[idx1]
                     )      
         gradients = gradients/X.shape[0]
         return gradients
