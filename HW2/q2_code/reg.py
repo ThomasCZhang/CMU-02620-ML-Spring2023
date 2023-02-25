@@ -14,10 +14,7 @@ class LogisticRegression:
             A float.
         """
         bias = 0
-        inner_prod = np.zeros(X.shape[0])
-        for idx0 in range(X.shape[0]):
-            for idx1 in range(X.shape[1]):
-                inner_prod[idx0] += self.w[idx1]*X[idx0, idx1]
+        inner_prod = np.dot(X, self.w)
         loss = 0
         for idx0 in range(X.shape[0]):
             loss += np.log(1 + np.exp(inner_prod[idx0]))-Y[idx0]*inner_prod[idx0]
@@ -33,12 +30,7 @@ class LogisticRegression:
         """
         bias = 0
         gradients = np.zeros(X.shape[1])
-        # The sufficient statistic for conditional MLE
-        inner_prod = [0 for i in range(X.shape[0])]
-        for idx0 in range(X.shape[0]):
-            for idx1, x_val in enumerate(X[idx0, :]):
-                inner_prod[idx0] += self.w[idx1]*x_val
-
+        inner_prod = np.dot(X, self.w)
         for idx0 in range(X.shape[1]):
             for idx1 in range(X.shape[0]):
                   gradients[idx0] += X[idx1,idx0]*(
@@ -58,7 +50,8 @@ class LogisticRegression:
             magnitude = np.linalg.norm(gradient)
             if magnitude < rho:
                 break
-            self.w = np.sum([self.w, -gradient], axis = 0)
+            print(f"\rMagnitude: {magnitude: 8.5e}", end = "")
+            self.w = np.sum([self.w, -eta*gradient], axis = 0)
 
 
 if __name__ == '__main__':
