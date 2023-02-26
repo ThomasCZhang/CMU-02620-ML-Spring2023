@@ -31,11 +31,7 @@ class LogisticRegression:
         bias = 0
         gradients = np.zeros(X.shape[1])
         inner_prod = np.dot(X, self.w)
-        for idx0 in range(X.shape[1]):
-            for idx1 in range(X.shape[0]):
-                  gradients[idx0] += X[idx1,idx0]*(
-                    (np.exp(inner_prod[idx1]))/(1+np.exp(inner_prod[idx1]))- Y[idx1]
-                    )      
+        gradients = (np.exp(inner_prod)/(1+np.exp(inner_prod)) - Y)@X
         gradients = gradients/X.shape[0]
         return gradients
 
@@ -50,7 +46,6 @@ class LogisticRegression:
             magnitude = np.linalg.norm(gradient)
             if magnitude < rho:
                 break
-            print(f"\rMagnitude: {magnitude: 8.5e}", end = "")
             self.w = np.sum([self.w, -eta*gradient], axis = 0)
 
 
