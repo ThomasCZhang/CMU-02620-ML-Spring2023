@@ -16,15 +16,17 @@ def main():
     mouse_data_genes = ReadGeneNames(os.path.join(dir, "mouse-data", gene_file_names[0]))
 
     PartA(mouse_data, mouse_data_genes, test_means)
-    PartB(mouse_data, mouse_data_genes)
+    # PartB(mouse_data, mouse_data_genes)
     # PartC(mouse_data, mouse_data_genes)
-    PartD(mouse_data, mouse_data_genes)
+    # PartD(mouse_data, mouse_data_genes)
      
     
 def PartA(mouse_data: np.ndarray, mouse_data_genes: list[str], test_means: np.ndarray):
     groups,loss = KMeans(mouse_data, mouse_data_genes, 3, test_means)
     save_path = os.path.join(os.path.dirname(__file__), "images\\4a.png")
-    PlotObjectiveFunction(loss, 3, save_path)
+    plot_title = f"Loss vs Training Generation for k = {3}"
+    PlotObjectiveFunction(loss, 3, plot_title, save_path)
+    print(f"Loss at convergence {loss[-1]}")
 
 def PartB(mouse_data: np.ndarray, mouse_data_genes: list[str]):
     raw_corr_coeff = np.corrcoef(mouse_data, rowvar=False)
@@ -62,13 +64,10 @@ def PartC(mouse_data: np.ndarray, mouse_data_genes: list[str]):
 
 
 def PartD(mouse_data: np.ndarray, mouse_data_genes: list[str]):
-
-    save_path = os.path.join(os.path.dirname(__file__), "Images\\4d.png")
-
     y = {}
     for idx, val in enumerate(range(3,13)):
         best_loss = np.inf
-        for idx1 in range(2):
+        for idx1 in range(10):
             groups = KMeans(mouse_data, mouse_data_genes, val)
             if groups[1][-1] < best_loss:
                 best_loss = groups[1][-1]
@@ -84,8 +83,25 @@ def PartD(mouse_data: np.ndarray, mouse_data_genes: list[str]):
 
     fig.tight_layout(w_pad = 0.25)
     fig.suptitle("Correlation Matrices for k=3 to k=12")
+    save_path = os.path.join(os.path.dirname(__file__), "Images\\4d.png")
     fig.savefig(save_path)
+    plt.close(fig)
 
+    x = range(3, 13)    
+    losses = [0 for i in range(3, 13)]
+    for idx, key in enumerate(y):
+        losses[idx] = y[key][1][-1]
+    
+    save_path = os.path.join(os.path.dirname(__file__), "Images\\4d2.png")
+    fig = plt.figure()
+    axs = fig.subplots()
+    axs.plot(x, losses)
+    axs.scatter(x, losses)
+    axs.set_xticks(range(3,13))
+    axs.set_title("K vs Final Loss")
+    axs.set_ylabel("Loss")
+    axs.set_xlabel("K")
+    fig.savefig(save_path)
 
 def ReadMeans(path: str) -> np.ndarray:
     """
@@ -168,11 +184,11 @@ def GetRearrangedData(groups: dict[int, list[np.ndarray, np.ndarray, list[str]]]
         num_samples = groups[key][1].shape[1]
         end_idx = start_idx + num_samples
         rearranged_data[:, start_idx:end_idx] = groups[key][1]
-        start_idx = end_idx
+        start_idx = end_idx 
 
     return rearranged_data
 
-def PlotObjectiveFunction(loss: list[int], k: int, savepath: str):
+def PlotObjectiveFunction(loss: list[int], k: int, title: str, savepath: str):
     """
     PlotObjectiveFunction: Plots and saves the objective function into a png file.
     Input:
@@ -182,9 +198,10 @@ def PlotObjectiveFunction(loss: list[int], k: int, savepath: str):
     fig = plt.figure(k)
     axs = fig.subplots()
     axs.plot(loss)
-    axs.set_title(f"Loss vs Training Generation for k = {k}")
+    axs.scatter(range(len(loss)), loss)
+    axs.set_title(title)
     axs.set_ylabel("Loss")
-    axs.set_xlabel("Generation")
+    axs.set_xlabel("Iteration")
     fig.savefig(savepath)
     fig.clf()
     
@@ -288,6 +305,8 @@ def MakeGroupDict(group_idx: list[int], k: int) -> dict[int, list[int]]:
 def CalculateObjectiveFunction(groups_dict: dict[int, list[np.ndarray, np.ndarray, list[str]]]) -> float:
     """
     CalculateObjectiveFunction: Calculates the objective function score of a Kmeans grouping. 
+    Input:
+        Groups_dict: dictionary for keeping track of the groups.
     """
     sum_distances = 0
     for key in groups_dict: # For each group.
