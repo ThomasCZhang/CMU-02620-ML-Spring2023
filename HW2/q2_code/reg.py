@@ -16,8 +16,7 @@ class LogisticRegression:
         bias = 0
         inner_prod = np.dot(X, self.w)
         loss = 0
-        for idx0 in range(X.shape[0]):
-            loss += np.log(1 + np.exp(inner_prod[idx0]))-Y[idx0]*inner_prod[idx0]
+        loss = np.sum(np.log(1 + np.exp(inner_prod))-Y*inner_prod)
         loss = loss/X.shape[0]
         return loss
         
@@ -31,7 +30,7 @@ class LogisticRegression:
         bias = 0
         gradients = np.zeros(X.shape[1])
         inner_prod = np.dot(X, self.w)
-        gradients = (np.exp(inner_prod)/(1+np.exp(inner_prod)) - Y)@X
+        gradients = (np.exp(inner_prod)/(1+np.exp(inner_prod)) - Y).T@X
         gradients = gradients/X.shape[0]
         return gradients
 

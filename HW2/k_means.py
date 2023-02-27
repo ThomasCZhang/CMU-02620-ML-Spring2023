@@ -16,17 +16,17 @@ def main():
     mouse_data_genes = ReadGeneNames(os.path.join(dir, "mouse-data", gene_file_names[0]))
 
     PartA(mouse_data, mouse_data_genes, test_means)
-    # PartB(mouse_data, mouse_data_genes)
-    # PartC(mouse_data, mouse_data_genes)
-    # PartD(mouse_data, mouse_data_genes)
+    PartB(mouse_data, mouse_data_genes)
+    PartC(mouse_data, mouse_data_genes)
+    PartD(mouse_data, mouse_data_genes)
      
     
 def PartA(mouse_data: np.ndarray, mouse_data_genes: list[str], test_means: np.ndarray):
     groups,loss = KMeans(mouse_data, mouse_data_genes, 3, test_means)
     save_path = os.path.join(os.path.dirname(__file__), "images\\4a.png")
-    plot_title = f"Loss vs Training Generation for k = {3}"
+    plot_title = f"Objective Value vs Training Generation for k = {3}"
     PlotObjectiveFunction(loss, 3, plot_title, save_path)
-    print(f"Loss at convergence {loss[-1]}")
+    print(f"Objective at convergence {loss[-1]}")
 
 def PartB(mouse_data: np.ndarray, mouse_data_genes: list[str]):
     raw_corr_coeff = np.corrcoef(mouse_data, rowvar=False)
@@ -56,7 +56,7 @@ def PartC(mouse_data: np.ndarray, mouse_data_genes: list[str]):
         rearranged_data = GetRearrangedData(groups)
         corr_coef = np.corrcoef(rearranged_data, rowvar = False)
         axs[int(np.floor(i/5)), i%5].imshow(corr_coef)
-        axs[int(np.floor(i/5)), i%5].set_title(f"Loss = {loss[-1]:3.2e}", fontsize=6)   
+        axs[int(np.floor(i/5)), i%5].set_title(f"Intialization {i+1}\nObjective = {loss[-1]:4.3e}", fontsize=6)   
 
     fig.tight_layout(w_pad = 0.25)
     fig.suptitle("10 Random Starts. k = 3")
@@ -79,7 +79,7 @@ def PartD(mouse_data: np.ndarray, mouse_data_genes: list[str]):
         rearranged_data = GetRearrangedData(y[k_size][0])
         corr_coef = np.corrcoef(rearranged_data, rowvar = False)
         axs[int(np.floor(idx/5)), idx%5].imshow(corr_coef)
-        axs[int(np.floor(idx/5)), idx%5].set_title(f"K = {k_size}\nLoss = {y[k_size][1][-1]: 3.2e}", fontsize = 6)
+        axs[int(np.floor(idx/5)), idx%5].set_title(f"K = {k_size}\nObjective = {y[k_size][1][-1]: 3.2e}", fontsize = 6)
 
     fig.tight_layout(w_pad = 0.25)
     fig.suptitle("Correlation Matrices for k=3 to k=12")
@@ -98,8 +98,8 @@ def PartD(mouse_data: np.ndarray, mouse_data_genes: list[str]):
     axs.plot(x, losses)
     axs.scatter(x, losses)
     axs.set_xticks(range(3,13))
-    axs.set_title("K vs Final Loss")
-    axs.set_ylabel("Loss")
+    axs.set_title("K vs Final Objective Value")
+    axs.set_ylabel("Objective Value")
     axs.set_xlabel("K")
     fig.savefig(save_path)
 
@@ -118,12 +118,16 @@ def ReadData(path: str) -> np.ndarray:
     return rawdata
 
 def ReadGeneNames(path: str) -> np.ndarray:
+    """
+    Reads the gene name data.
+    """
     with open(path) as f:
         gene_names = f.readline().strip().split(",")
     return gene_names
 
 def KMeans(x: np.ndarray, names: list[str], k: int,
-            means: np.ndarray = np.array(0)) -> dict[int, list[np.ndarray, np.ndarray, list[str], list[int]]]:
+            means: np.ndarray = np.array(0)) -> list[
+            dict[int, list[np.ndarray, np.ndarray, list[str], list[int]]],int]:
     """
     Performs KMeans Clustering.
     input:
@@ -131,6 +135,11 @@ def KMeans(x: np.ndarray, names: list[str], k: int,
         names: The names of each ponit in the data.
         means: The means of the data
         k: The number of means to use
+    output:
+        The clustered data:
+        A dictionary where key = cluster number, value = list containing the mean of the cluster,
+        the data points in the cluster, and the names of the genes in the cluster.
+        The objective values: Objective values accross the training iterations.
     """
     # Generate the random starting means if starting means not given.
     if len(means.shape) == 0:
@@ -194,14 +203,17 @@ def PlotObjectiveFunction(loss: list[int], k: int, title: str, savepath: str):
     Input:
         loss: The loss function.
         k: number of means
+    Output:
+        None
     """
     fig = plt.figure(k)
     axs = fig.subplots()
     axs.plot(loss)
     axs.scatter(range(len(loss)), loss)
     axs.set_title(title)
-    axs.set_ylabel("Loss")
+    axs.set_ylabel("Objective Value")
     axs.set_xlabel("Iteration")
+    fig.tight_layout()
     fig.savefig(savepath)
     fig.clf()
     
@@ -215,6 +227,9 @@ def MakeKMeansDict(means: np.ndarray, x: np.ndarray, groups_idx: list[int],
         x: The data.
         group_idx: A dictionary where k = the group and value = the index of the row in X that belongs to the group.
         names: The names of the data points in X.
+    Output:
+        A dictionary where key = cluster number, value = list containing the mean of the cluster,
+        the data points in the cluster, and the names of the genes in the cluster.
     """
     groups = {}
     for key in groups_idx:
@@ -226,10 +241,13 @@ def MakeKMeansDict(means: np.ndarray, x: np.ndarray, groups_idx: list[int],
 def GenerateClusterIndexes(x: np.ndarray, means: np.ndarray, k: int) -> list[int]:
     """
     GenerateClusters: Generates the clusters of points around each mean.
-    x: All of the data stored as an numpy array. Each column is a data point.
-    names: The list of names corresponding to each data point.
-    means: The current means. Each column is a set of coordinates to describe a point.
-    k: The number of means to use.
+    Input:
+        x: All of the data stored as an numpy array. Each column is a data point.
+        names: The list of names corresponding to each data point.
+        means: The current means. Each column is a set of coordinates to describe a point.
+        k: The number of means to use.
+    Output:
+        The cluster that x belongs to.
     """
     groups = [0 for i in range(x.shape[1])]
     for idx0 in range(x.shape[1]):
@@ -263,6 +281,8 @@ def CalculateNewMeans(x: np.ndarray, group_idx: list[int], k: int, old_means: np
         x: The data set.
         group_idx: The group each data point belongs to.
         k: The number of means to calculate.
+    Output:
+        The coordinates of the new mean.
     """
     new_means = old_means.copy()
 
@@ -291,6 +311,8 @@ def MakeGroupDict(group_idx: list[int], k: int) -> dict[int, list[int]]:
     Input:
         group_idx: The list of which group an index belongs in.
         k: number of groups.
+    Output:
+        A dictionary where key = group, value = indexes that belong to the group.
     """
     groups = {}
     for idx in range(k): # Setting up a dictionary for easy access to indexes in each group.
@@ -307,6 +329,8 @@ def CalculateObjectiveFunction(groups_dict: dict[int, list[np.ndarray, np.ndarra
     CalculateObjectiveFunction: Calculates the objective function score of a Kmeans grouping. 
     Input:
         Groups_dict: dictionary for keeping track of the groups.
+    Output:
+        The K-means clustering objective function. Sum of squared distances from a point to its cluster center.
     """
     sum_distances = 0
     for key in groups_dict: # For each group.
@@ -314,7 +338,7 @@ def CalculateObjectiveFunction(groups_dict: dict[int, list[np.ndarray, np.ndarra
             data_points = groups_dict[key][1]
             center = groups_dict[key][0]
             for idx in range(data_points.shape[1]):
-                sum_distances += EuclideanDistance(center, data_points[:, idx])
+                sum_distances += np.power(EuclideanDistance(center, data_points[:, idx]),2)
     return sum_distances
 
 def EuclideanDistance(p1: np.ndarray, p2: np.ndarray) -> float:
