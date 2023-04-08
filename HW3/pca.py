@@ -13,8 +13,15 @@ def pca(X, D):
     """
     X = X-np.mean(X, axis = 0)
     u, s, vh = np.linalg.svd(X)
-    X_reduced = u[:, :D]@np.diag(s)[:D, :D]@vh[:D, :]
-    return X_reduced
+    pca_x = u[:, :D]@np.diag(s)[:D, :D]@vh[:D, :]
+
+    # Eigan implementation.
+    # cov = X.T@X
+    # eig_val, eig_vec = np.linalg.eig(cov)
+    # sorted_idx = np.argsort(eig_val)[::-1]
+    # eig_vec = eig_vec[:,sorted_idx[0:D]]
+    # pca_x = X @ eig_vec @ eig_vec.T
+    return pca_x
 
 
 def sklearn_pca(X, D):

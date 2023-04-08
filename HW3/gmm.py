@@ -172,6 +172,7 @@ def GMM(X, init_means, init_covs, init_mix_props, thresh=0.001, reg_covar: float
         mix_props = UpdateMixProps(hidden_matrix)
         covs = UpdateCovars(X, hidden_matrix, means)
         means = UpdateMeans(X, hidden_matrix)
+        print(i, loss[i])
         i += 1
     return np.argmax(hidden_matrix, axis=1), loss[:i], hidden_matrix
 
@@ -225,23 +226,26 @@ def Question6A(data, test_means):
     init_mix_props = np.asarray([0.3, 0.3, 0.4])
 
     _, loss, hm = GMM(data, test_means, init_cov, init_mix_props, reg_covar=0)
-    np.savetxt("6a.txt", hm[0, :])
+    # np.savetxt("6a.txt", hm[0, :])
 
-    CustomPlot(
-        loss,
-        xlabel="Iteration Number",
-        ylabel="Log Likelihood",
-        title="Log Likelihood vs Iteration Number for 3 clusters",
-        save_path="6a.png",
-    )
+    print(loss[-1])
+    # CustomPlot(
+    #     loss,
+    #     xlabel="Iteration Number",
+    #     ylabel="Log Likelihood",
+    #     title="Log Likelihood vs Iteration Number for 3 clusters",
+    #     save_path="6a.png",
+    # )
 
 
 def Question6C(data):
-    best_losses = -np.inf * np.ones(8)
+    min_k = 2
+    max_k = 15
+    best_losses = -np.inf * np.ones(max_k-min_k+1)
     d = data.shape[1]
-    for k in range(3, 11):
-        for i in range(10):
-            print(f"Number of Clusters: {k}\tIteration: {i}.", end = "")
+    for k in range(min_k, max_k+1):
+        for i in range(1):
+            print(f"\rNumber of Clusters: {k}\tIteration: {i}.", end = "")
             init_means, init_covs, init_mix_props = RandomParams(data, k, d)
             _, loss, _ = GMM(data, init_means, init_covs, init_mix_props)
             if loss[-1] > best_losses[k - 3]:
@@ -249,11 +253,11 @@ def Question6C(data):
     print("\nDone!")
     CustomPlot(
         best_losses,
-        x=np.asarray(range(3, 11)),
+        x=np.asarray(range(min_k, max_k+1)),
         xlabel="Number of Clusters",
         ylabel="Log Likelihood",
         title="Log Likelihood vs Number of clusters",
-        save_path="6C.png",
+        save_path="TEST.png",
     )
 
 
@@ -270,4 +274,4 @@ if __name__ == "__main__":
     print("test_means shape: ", test_means.shape)
 
     Question6A(data, test_means)
-    Question6C(data)
+    # Question6C(data)
