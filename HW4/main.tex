@@ -1,0 +1,178 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{secdot}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{placeins}
+\usepackage[many]{tcolorbox}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage[super]{nth}
+\usepackage{palatino} % Comment out to return to Computer Modern
+\usepackage{inconsolata} % Comment out to return typewriter font to Courier
+\begin{document}
+
+
+%---------------------------------------------------------------------------
+
+\title{Homework 4 - Part 1}
+\date{}
+\maketitle
+
+%---------------------------------------------------------------------------
+
+\noindent
+\noindent
+{\bf Instructions on homework submission.} This assignment has a slightly different structure from previous homeworks. There are two separate submissions: First part is Hidden Markov model related questions(this pdf). \textbf{You need to submit first part on April 17th.} You are allowed to use only one late day if you need to. This is because the final exam is approaching, and we want to release a solution as soon as possible.
+The Second part is a programming assignment. This time, however, is quite coding intensive, if you are not familiar with Pytorch. Please check the recitation. To make you familiar with Pytorch, \textbf{programming part is due April 24th.} However, \textbf{you should start this programming part as early as possible.}
+For the first part, submit a pdf file. For the second part, submit a .ipynb file.
+
+
+\begin{enumerate}
+
+
+
+
+
+\item {[Hidden Markov Model, 40pts]} Consider the following hidden Markov model for annotating the chromatin states given the DNA methylation data. 
+Assume the methylation data have been binarized into either methylated or non-methylated at each locus.
+The DNA methylation data are given as a sequence of 1's for methylated DNA positions and 0's for non-methylated DNA positions.
+Assume four chromatin states: promoters (P), enhancers (E), transcribed regions (R), and background (B).
+\begin{align*}
+	     &  \text{P}\quad\;\;\text{E}\quad\;\;\text{R}\quad\;\;\text{B} \\
+\mathbf{\pi} = [&0.2 \quad 0.3 \quad 0.3 \quad  0.2] \\
+\end{align*}
+\vspace{-20pt}
+\begin{align*}
+\mathbf{T} &= \begin{bmatrix}
+				&  \text{P} & \text{E} & \text{R} & \text{B} \\
+P(q_t|q_{t-1}=\text{P}) 	&  0.3 	& 0.1 	& 0.3 	&  0.3 \\
+P(q_t|q_{t-1}=\text{E}) 	&  0.1 	& 0.4 	& 0.1 	&  0.4 \\
+P(q_t|q_{t-1}=\text{R}) 	&  0.1 	& 0.1 	& 0.4 	&  0.4 \\ 
+P(q_t|q_{t-1}=\text{B}) 	&  0.1 	& 0.1 	& 0.1 	&  0.7 
+\end{bmatrix} \\
+\mathbf{E} &= \begin{bmatrix}
+			&   \text{non methylated} & \text{methylated} \\
+P(o_t|q_{t}=\text{P}) 	&  0.9 	& 0.1 	\\
+P(o_t|q_{t}=\text{E}) 	&  0.8 	& 0.2 	\\
+P(o_t|q_{t}=\text{R}) 	&  0.9 	& 0.1 	\\
+P(o_t|q_{t}=\text{B}) 	&  0.2 	& 0.8 	\\
+\end{bmatrix} \\
+\end{align*}
+
+\begin{figure}[h!]
+    \centering
+\vspace{-80pt}
+    \includegraphics[scale=0.4]{hmm.pdf}
+\label{fig:hmm}
+\vspace{-80pt}
+\caption{Hidden Markkov model}
+\end{figure}
+
+Answer the following questions on HMMs.
+
+\begin{enumerate}
+\item (5 pts) See the HMM in Figure \ref{fig:hmm} and answer the questions about conditional independencies.
+\begin{enumerate}
+\item Is $q_T$ conditionally independent of $q_3$ given $o_{T-1}$?
+\newline
+\begin{tcolorbox}[fit,height=1cm, width=10cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item Is $q_T$ conditionally independent of $q_3$ given $q_{T-1}$?
+\newline
+\begin{tcolorbox}[fit,height=1cm, width=10cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item Is $q_T$ conditionally independent of $q_1$ given $q_{3}$?
+\newline
+\begin{tcolorbox}[fit,height=1cm, width=10cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item Is $q_T$ conditionally independent of $q_1$ given $o_{3}$?
+\newline
+\begin{tcolorbox}[fit,height=1cm, width=10cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item Is $o_2$ conditionally independent of $o_1$ given $q_{2}$?
+\newline
+\begin{tcolorbox}[fit,height=1cm, width=10cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\end{enumerate}
+
+\item (30 pts) Consider the sequence of methylation `010011' of length 6. You may calculate by yourself or use programming for answering the question. However, you do not need to submit the program in the programming submission. 
+\begin{enumerate}
+\item (3 pts) Compute the probability $P(\text{PBRRRB},010011)$.
+\newline
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item (10 pts) Use the forward-backward algorithm. Compute $\alpha$'s and $\beta$'s for each position.
+\newline
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item (3 pts) Compute the probability $P(010011)$.
+\newline
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item (3 pts) Compute the probability $P(\text{PBRRRB}|010011)$.
+\newline
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item (3 pts) Compute the probability $P(q_3=R|010011)$.
+\\
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\item (8 pts) Compute the most probable sequence of annotation given this methylation data.\\
+\\
+\begin{tcolorbox}[fit,height=5cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+\end{enumerate}
+
+\item (5 pts) Calculate the parameters of this model given the following data. Assume the annotation is given. [Hint: There should be 4 initial parameters, 16 transition probabilities, 8 emission probabilities].
+\begin{align*}
+\text{PBRRRB}\quad 010011  \\
+\text{BEBPRR}\quad 101001  \\
+\text{EBPRRB}\quad 010101  \\
+\end{align*}
+\newline
+\begin{tcolorbox}[fit,height=20cm, width=15cm, blank, borderline={1pt}{-2pt},nobeforeafter]
+%solution
+
+\end{tcolorbox}
+
+
+
+\end{enumerate}
+
+
+
+
+
+
+\end{enumerate}
+
+
+
+
+
+\end{document}
